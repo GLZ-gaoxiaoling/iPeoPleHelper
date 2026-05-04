@@ -1,4 +1,4 @@
-package fun.pardon.ipeoplehelper
+package `fun`.pardon.ipeoplehelper
 
 import io.flutter.embedding.android.FlutterActivity
 
