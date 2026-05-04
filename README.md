@@ -46,9 +46,6 @@
 ./gradlew assembleDebug
 ```
 
-## 关于图标
-
-App 图标是撇科松（是的，就是你想的那个）。
 
 ## License
 
