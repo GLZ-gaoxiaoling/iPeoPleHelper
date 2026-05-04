@@ -1,8 +1,11 @@
 # IPeopleHelper（我要验牌）
 
-一个很正经的整活音效板 Android App，用 Kotlin + Jetpack Compose 写的。
+一个很正经的整活音效板 App。点一下按钮，放一句骚话，就这么简单。
 
-点一下按钮，放一句骚话，就这么简单。
+## 分支说明
+
+- **master** — 原版 Kotlin + Jetpack Compose Android 项目
+- **flutter** — Flutter 跨平台版本（Android + iOS），迁移自 master
 
 ## 音效列表
 
@@ -24,28 +27,21 @@
 | 给白傻子买瓜子去 | wav |
 | 我上早八 | wav |
 
-## 功能
+## Flutter 版技术栈
 
-- 音效板首页，按钮网格排列，点击即播
-- 设置页可调音频通道（媒体/通知）和最大同时播放数
-- 设置持久化到 SharedPreferences
-
-## 技术栈
-
-- Kotlin
-- Jetpack Compose + Material3
-- SoundPool 播放音效
-- Gradle Kotlin DSL
-- minSdk 30 / targetSdk 35
+- Dart + Flutter 3.41
+- Material 3
+- audioplayers 播放音效
+- shared_preferences 存设置
+- iOS 静音模式也能播放（AVAudioSession.playback）
 
 ## 构建
 
-用 Android Studio 打开项目，直接跑就行。或者命令行：
-
 ```bash
-./gradlew assembleDebug
+cd flutter_app
+flutter pub get
+flutter run
 ```
-
 
 ## License
 
