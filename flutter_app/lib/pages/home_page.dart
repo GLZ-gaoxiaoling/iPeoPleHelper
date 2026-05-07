@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/sound_item.dart';
@@ -106,30 +107,50 @@ class _HomePageState extends State<HomePage> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.audio,
       allowMultiple: false,
+      withData: true,  // iOS: 必须立即读数据，安全域会在 await 后过期
     );
     if (result == null || result.files.isEmpty) return;
 
     final pickedFile = result.files.first;
-    final sourcePath = pickedFile.xFile.path;
+    final originalName = pickedFile.name;
 
-    // 输入名称
+    // 立即读取文件数据（iOS 安全域保护，必须同步读）
+    late Uint8List fileBytes;
+    try {
+      if (pickedFile.bytes != null) {
+        fileBytes = pickedFile.bytes!;
+      } else {
+        // fallback: 从路径读
+        final f = File(pickedFile.path!);
+        fileBytes = await f.readAsBytes();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('读取文件失败：${e.toString().split('\n').first}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 输入名称（此时文件数据已安全读入内存）
     if (!mounted) return;
     final name = await _showNameDialog(pickedFile);
     if (name == null || name.isEmpty) return;
 
-    // 复制到沙盒
+    // 写入沙盒
     try {
       final customDir = await SoundDataManager.getCustomSoundsDir();
-      final ext =
-          pickedFile.name.contains('.')
-              ? '.${pickedFile.name.split('.').last}'
-              : '';
-      final fileName =
-          'custom_${DateTime.now().millisecondsSinceEpoch}$ext';
+      final ext = originalName.contains('.')
+          ? '.${originalName.split('.').last}'
+          : '';
+      final fileName = 'custom_${DateTime.now().millisecondsSinceEpoch}$ext';
       final destPath = '${customDir.path}/$fileName';
 
-      final source = File(sourcePath);
-      await source.copy(destPath);
+      await File(destPath).writeAsBytes(fileBytes);
 
       // 保存
       await SoundDataManager.addCustomItem(name, destPath);
