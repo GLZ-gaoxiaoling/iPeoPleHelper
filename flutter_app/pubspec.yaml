@@ -3,7 +3,7 @@ description: 一个很正经的整活音效板 App
 
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: ^3.11.0
