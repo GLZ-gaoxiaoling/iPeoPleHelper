@@ -322,11 +322,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// 构建音效网格（响应式列数）
+  /// - 窄屏（手机）    : 2 列
+  /// - 中屏（平板横屏）: 3 列
+  /// - 宽屏（桌面/大平板）: 4 列
   Widget _buildSoundGrid() {
+    // 根据屏幕宽度动态计算网格列数
+    final screenWidth = MediaQuery.of(context).size.width;  // 获取屏幕宽度
+    int crossAxisCount;
+    if (screenWidth >= 900) {
+      crossAxisCount = 4; // 宽屏 / 桌面
+    } else if (screenWidth >= 600) {
+      crossAxisCount = 3; // 平板 / 中屏
+    } else {
+      crossAxisCount = 2; // 手机 / 窄屏
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 1.4,

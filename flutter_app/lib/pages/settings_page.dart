@@ -125,8 +125,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     ButtonSegment(value: 1, label: Text('1')),
                     ButtonSegment(value: 2, label: Text('2')),
                     ButtonSegment(value: 3, label: Text('3')),
+                    ButtonSegment(value: 4, label: Text('4')),
                     ButtonSegment(value: 5, label: Text('5')),
                     ButtonSegment(value: 10, label: Text('10')),
+                    ButtonSegment(value: 20, label: Text('20')),
                   ],
                   selected: {_maxStreams},
                   onSelectionChanged: (value) {
@@ -162,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '我要验牌 v1.1.0',
+                  '我要验牌 v1.1.1',
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 4),
