@@ -180,7 +180,8 @@ class _HomePageState extends State<HomePage> {
     final defaultName =
         pickedFile.name.replaceAll(RegExp(r'\.[^.]+$'), '');
     final controller = TextEditingController(text: defaultName);
-    return showDialog<String>(
+    // 对话框关闭后释放 controller
+    final result = showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('给卡片起个名'),
@@ -204,6 +205,8 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+    result.whenComplete(() => controller.dispose());
+    return result;
   }
 
   void _confirmDelete(SoundItem item) {

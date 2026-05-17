@@ -23,9 +23,12 @@ class AudioManager {
   /// 播放音效
   Future<void> play(SoundItem item, {double volume = 1.0}) async {
     try {
-      // 如果已达到上限，停止最早的一个
+      // 如果已达到上限，释放最早的一个
       while (_pool.length >= maxStreams && _pool.isNotEmpty) {
-        await _pool.removeAt(0).player.stop();
+        final slot = _pool.removeAt(0);
+        await slot.player.stop();
+        await slot.player.dispose();
+        _cancelSubscriptions(slot);
       }
 
       final player = AudioPlayer();
@@ -39,12 +42,12 @@ class AudioManager {
       await player.setVolume(volume);
 
       // 监听播放状态
-      player.onPlayerComplete.listen((_) {
+      slot.onCompleteSub = player.onPlayerComplete.listen((_) {
         _notifyPlayback(item.id, false);
         _removePlayer(slot);
       });
 
-      player.onPlayerStateChanged.listen((state) {
+      slot.onStateChangedSub = player.onPlayerStateChanged.listen((state) {
         _notifyPlayback(item.id, state == PlayerState.playing);
       });
 
@@ -66,7 +69,9 @@ class AudioManager {
     final toRemove = <_PlayerSlot>[];
     for (final slot in _pool) {
       if (slot.soundId == soundId) {
+        slot.cancelSubscriptions();
         await slot.player.stop();
+        await slot.player.dispose();
         toRemove.add(slot);
       }
     }
@@ -79,7 +84,9 @@ class AudioManager {
   /// 停止所有播放
   Future<void> stopAll() async {
     for (final slot in _pool) {
+      slot.cancelSubscriptions();
       await slot.player.stop();
+      await slot.player.dispose();
     }
     for (final item in _pool.toList()) {
       _notifyPlayback(item.soundId, false);
@@ -97,6 +104,8 @@ class AudioManager {
   /// 释放所有资源
   Future<void> dispose() async {
     for (final slot in _pool) {
+      slot.cancelSubscriptions();
+      await slot.player.stop();
       await slot.player.dispose();
     }
     _pool.clear();
@@ -104,6 +113,10 @@ class AudioManager {
 
   void _notifyPlayback(int soundId, bool isPlaying) {
     onPlaybackUpdate?.call(soundId, isPlaying);
+  }
+
+  void _cancelSubscriptions(_PlayerSlot slot) {
+    slot.cancelSubscriptions();
   }
 
   void _removePlayer(_PlayerSlot slot) {
@@ -115,10 +128,19 @@ class _PlayerSlot {
   final AudioPlayer player;
   final int soundId;
   final int playerId;
+  StreamSubscription? onCompleteSub;
+  StreamSubscription? onStateChangedSub;
 
   _PlayerSlot({
     required this.player,
     required this.soundId,
     required this.playerId,
   });
+
+  void cancelSubscriptions() {
+    onCompleteSub?.cancel();
+    onCompleteSub = null;
+    onStateChangedSub?.cancel();
+    onStateChangedSub = null;
+  }
 }

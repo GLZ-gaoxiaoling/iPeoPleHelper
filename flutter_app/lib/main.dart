@@ -44,10 +44,13 @@ class _IPeopleHelperAppState extends State<IPeopleHelperApp> {
     // 这个设置在下一次 App 启动时生效（因为 AudioManager 在 init 时创建）
     // 实际上我们可以动态重建 AudioManager
     setState(() => _maxStreams = count);
+    final oldManager = _audioManager;
     _audioManager = AudioManager(maxStreams: count);
     // 同步音量到新的管理器
     _audioManager.setVolume(_volume);
     _audioManager.onPlaybackUpdate = null; // 会被主页重新绑定
+    // 释放旧管理器资源
+    oldManager.dispose();
   }
 
   void _onVolumeChanged(double volume) {
